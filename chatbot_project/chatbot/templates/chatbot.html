@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind2i Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        #chatbot-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            border: none;
+        }
+        #chat-container {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 320px;
+            height: 550px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+        }
+        #chat-header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        #chat-messages {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .bot-message { background-color: #e1f5fe; align-self: flex-start; }
+        .user-message { background-color: #c8e6c9; align-self: flex-end; }
+        #user-input { border: none; padding: 10px; width: calc(100% - 50px); }
+        #send-btn { border: none; background-color: #007bff; color: white; padding: 10px; cursor: pointer; }
+        .predefined-queries {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px;
+            gap: 5px;
+        }
+        .predefined-queries button {
+            background: #e6f2ff;
+            color: #007bff;
+            border: 1px solid #007bff;
+            padding: 5px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .subqueries {
+            margin-left: 15px;
+            display: none;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .subqueries button {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 5px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .response-buttons {
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+        }
+        .response-buttons button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<button id="chatbot-btn" onclick="openChatbot()">Chat with Us</button>
+
+<div id="chat-container">
+    <div id="chat-header" onclick="closeChatbot()">Mind2i Chatbot ✖</div>
+    <div id="chat-messages">
+        <div class="message bot-message">Hello! Welcome to Mind2i Bot 👋. How can I assist you today?</div>
+
+        <div class="predefined-queries">
+            <button onclick="toggleSubqueries('courses')">Courses ⬇</button>
+            <div id="courses-subqueries" class="subqueries">
+                <button onclick="sendPredefinedMessage('Python Full Stack')">Python Full Stack</button>
+                <button onclick="sendPredefinedMessage('Data Science')">Data Science</button>
+                <button onclick="sendPredefinedMessage('Data Engineering')">Data Engineering</button>
+                <button onclick="sendPredefinedMessage('Data Analytics')">Data Analytics</button>
+            </div>
+
+            <button onclick="toggleSubqueries('internship')">Internship ⬇</button>
+            <div id="internship-subqueries" class="subqueries">
+                <button onclick="sendPredefinedMessage('Duration')">Duration</button>
+                <button onclick="sendPredefinedMessage('Certification Process')">Certification</button>
+            </div>
+
+            <button onclick="toggleSubqueries('job')">Job Assistance ⬇</button>
+            <div id="job-subqueries" class="subqueries">
+                <button onclick="sendPredefinedMessage('Resume Building')">Resume Building</button>
+                <button onclick="sendPredefinedMessage('Interview Preparation')">Interview Prep</button>
+            </div>
+
+            <button onclick="sendPredefinedMessage('Eligibility & Admission Process')">Eligibility</button>
+            <button onclick="sendPredefinedMessage('Fees & Payment Options')">Fees</button>
+            <button onclick="sendPredefinedMessage('Contact Details')">Contact</button>
+            <button onclick="sendPredefinedMessage('Location')">Location</button>
+        </div>
+    </div>
+    <div style="display: flex;">
+        <input type="text" id="user-input" placeholder="Type a message...">
+        <button id="send-btn" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    function openChatbot() {
+        let chatContainer = document.getElementById('chat-container');
+        if (chatContainer.style.display === 'none' || chatContainer.style.display === '') {
+            chatContainer.style.display = 'flex';
+        }
+    }
+    
+
+    function closeChatbot() {
+        document.getElementById('chat-container').style.display = 'none';
+        alert('Thanks for chatting with Mind2i. Have a great day!');
+    }
+
+    function toggleSubqueries(id) {
+        let subqueryDiv = document.getElementById(id + '-subqueries');
+        subqueryDiv.style.display = subqueryDiv.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function addMessage(sender, text) {
+        let chatMessages = document.getElementById('chat-messages');
+        let messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', sender === 'User' ? 'user-message' : 'bot-message');
+        messageDiv.textContent = text;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Add response buttons only if the sender is 'Bot' and buttons do not already exist
+        if (sender === 'Bot' && !document.querySelector('.response-buttons')) {
+            addResponseButtons();
+        }
+    }
+
+    function sendPredefinedMessage(message) {
+        addMessage('User', message);
+        fetchResponse(message);
+    }
+
+    async function fetchResponse(message) {
+        try {
+            let response = await fetch('/chatbot/get-response/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ user_input: message }),
+            });
+            let data = await response.json();
+            addMessage('Bot', data.response);
+        } catch (error) {
+            addMessage('Bot', 'Sorry, an error occurred. Please contact our support team. info@mind2i.com ');
+        }
+    }
+
+    function sendMessage() {
+        const userInput = document.getElementById('user-input').value;
+        if (userInput.trim() !== '') {
+            addMessage('User', userInput);
+            fetchResponse(userInput);
+            document.getElementById('user-input').value = '';
+        }
+    }
+
+    document.getElementById('user-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    function addResponseButtons() {
+        let responseButtonsContainer = document.createElement('div');
+        responseButtonsContainer.classList.add('response-buttons');
+
+        let queryText = document.createElement('div');
+        queryText.textContent = 'Did this help?';
+        responseButtonsContainer.appendChild(queryText);
+
+        let yesButton = document.createElement('button');
+        yesButton.textContent = 'Yes';
+        yesButton.onclick = () => addResponseMessage('Yes');
+
+        let noButton = document.createElement('button');
+        noButton.textContent = 'No';
+        noButton.onclick = () => addResponseMessage('No');
+
+        responseButtonsContainer.appendChild(yesButton);
+        responseButtonsContainer.appendChild(noButton);
+
+        document.getElementById('chat-messages').appendChild(responseButtonsContainer);
+    }
+
+    function addResponseMessage(response) {
+        addMessage('Bot', response === 'Yes' ? 'Thank you for connecting with us! 😊' : 'Please contact support at info@mind2i.com.');
+        let responseButtonsContainer = document.querySelector('.response-buttons');
+        if (responseButtonsContainer) {
+            responseButtonsContainer.remove();
+        }
+    }
+</script>
+
+
+</body>
+</html>
